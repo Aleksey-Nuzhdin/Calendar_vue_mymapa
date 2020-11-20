@@ -1,6 +1,8 @@
 <template>
   <div class="field" id='scroll'>
-    <div class="filed__wrap">
+    <div class="filed__wrap"
+      :style="{ top:scroll+'px' }"
+    >
       <ul class="time__list">
         <li class="hour">01:00</li>
         <li class="hour">02:00</li>
@@ -33,28 +35,42 @@
 
 <script>
 export default {
-  
+  name: 'Field',
+  props:['scroll','from','to'],
+  data:()=>({
+    setFrom: 0,
+    setTo: 0,
+  }),
+  methods:{
+    setDate(){
+      this.setFrom = +this.from
+      this.setTo = +this.to
+    },
+  },
+  created(){
+    this.$parent.$on('setDate', this.setDate);
+  },
 }
 </script>
 
 <style scoped lang="scss">
 .field{
   position: relative;
-  
   width: 100%;
   max-height: calc(100vh - 300px);
   min-height: 300px;
   height: 70vh;
-
 }
 .filed__wrap{
   position: absolute;
   display: flex;
+  top: 0;
 }
 .time__list{
   padding-top: 24px;
   height: 100%;
   width: 80px;
+  color: #717171;
 }
 .hour{
   position: relative;
@@ -91,4 +107,5 @@ export default {
   background-repeat: repeat;
 
 }
+
 </style>

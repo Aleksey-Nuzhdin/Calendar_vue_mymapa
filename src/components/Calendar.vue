@@ -33,8 +33,37 @@
           <span class="number">21</span>
         </li>
       </ul>
-      <Field />
+      <Field 
+        :scroll='scroll'
+        :from='from'
+        :to='to'
+      />
+      <a @click.prevent='scrollUp' class="scrollBtn scrollUp">Up</a>
+      <a @click.prevent='scrollDown' class="scrollBtn scrollDown">Down</a> 
     </div>
+    <form class="setDate"
+        @submit.prevent='submit'
+      >
+        <label for="from">От</label>
+        <input
+            id="from"
+            type="text"
+            v-model="from"
+        >
+        
+        <label for="to">До</label>
+        <input
+            id="to"
+            type="text"
+            v-model="to"
+        >
+        <button
+            class=""
+            type="submit"
+        >
+          Показать
+        </button>
+      </form>
   </div>
 </template>
 
@@ -43,8 +72,21 @@ import Field from './Field'
 
 export default {
   name: 'Calendar',
+  data:()=>({
+    scroll: 0,
+    from: 0,
+    to: 0,
+  }),
   methods:{
-
+    scrollUp(){
+      this.scroll += 50
+    },
+    scrollDown(){
+      this.scroll -= 50
+    },
+    submit(){
+      this.$emit('setDate')
+    },
   },
   components:{ Field, }
 }
@@ -76,12 +118,15 @@ export default {
 .gmt{
   height: 100%;
   width: 80px;
-  border-bottom: 2px solid #d6d4d4;
-  
   display: flex;
   justify-content: right;
   align-items: flex-end;
   padding-right: 18px;
+
+  background-image: linear-gradient(to right, white, #d6d4d4);
+  background-size: 80px 2px;
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
 
   & span{
     width: 80px;
@@ -94,6 +139,7 @@ export default {
   background-color: white;
   height: 80px;
   width: 100%;
+  color: #717171;
 }
 .date__item{
   display: flex;
@@ -117,6 +163,23 @@ export default {
 .number{
   width: 200px;
   font-size: 40px;
+}
+
+.scrollBtn{
+  position: absolute;
+  display: block;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background-color: rgb(7, 190, 68);
+}
+.scrollUp{
+  right: 50px;
+  bottom: 150px;
+}
+.scrollDown{
+  right: 50px;
+  bottom: 100px;
 }
 
 </style>
