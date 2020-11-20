@@ -13,24 +13,8 @@
           <span class="number">20</span>
         </li>
         <li class="date__item">
-          <span class="day_week">СР</span>
-          <span class="number">21</span>
-        </li>
-        <li class="date__item">
-          <span class="day_week">СР</span>
-          <span class="number">21</span>
-        </li>
-        <li class="date__item">
-          <span class="day_week">СР</span>
-          <span class="number">21</span>
-        </li>
-        <li class="date__item">
-          <span class="day_week">СР</span>
-          <span class="number">21</span>
-        </li>
-        <li class="date__item">
-          <span class="day_week">СР</span>
-          <span class="number">21</span>
+          <span class="day_week">{{dateFilrer(toDo[3].startDate,{weekday:'short'}).toUpperCase()}}</span>
+          <span class="number">{{dateFilrer(toDo[3].startDate,{day:'2-digit'})}}</span>
         </li>
       </ul>
       <Field 
@@ -76,6 +60,15 @@ export default {
     scroll: 0,
     from: 0,
     to: 0,
+    toDo:[
+          {"title": "Заголовок 1", "startDate": 1585699200, "endDate": 1585702800},
+          {"title": "Заголовок 2", "startDate": 1585706400, "endDate": 1585710000},
+          {"title": "Заголовок 3", "startDate": 1585789200, "endDate": 1585792800},
+          {"title": "Заголовок 4", "startDate": 1586307600, "endDate": 1586311200},
+          {"title": "Заголовок 5", "startDate": 1585791500, "endDate": 1585795100},
+          {"title": "Заголовок 6", "startDate": 1585706400, "endDate": 1585710000}
+        ]
+
   }),
   methods:{
     scrollUp(){
@@ -87,6 +80,10 @@ export default {
     submit(){
       this.$emit('setDate')
     },
+    dateFilrer(val, options, lang='ru-RU'){
+      const date = new Date(val*1000)
+      return new Intl.DateTimeFormat(lang, options).format(date)
+    }
   },
   components:{ Field, }
 }

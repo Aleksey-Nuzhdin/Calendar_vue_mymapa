@@ -4,21 +4,10 @@
       :style="{ top:scroll+'px' }"
     >
       <ul class="time__list">
-        <li class="hour">01:00</li>
-        <li class="hour">02:00</li>
-        <li class="hour">03:00</li>
-        <li class="hour">04:00</li>
-        <li class="hour">05:00</li>
-        <li class="hour">06:00</li>
-        <li class="hour">07:00</li>
-        <li class="hour">08:00</li>
-        <li class="hour">09:00</li>
-        <li class="hour">10:00</li>
-        <li class="hour">11:00</li>
-        <li class="hour">12:00</li>
-        <li class="hour">13:00</li>
-        <li class="hour">14:00</li>
-        <li class="hour">15:00</li>
+        <li class="hour"
+          v-for="time in timeArr" :key="time"
+        >
+        {{time}}:00</li>
       </ul>
       <ul class="day__list">
         <li class="day__item"></li>
@@ -40,6 +29,7 @@ export default {
   data:()=>({
     setFrom: 0,
     setTo: 0,
+    timeArr: []
   }),
   methods:{
     setDate(){
@@ -49,6 +39,11 @@ export default {
   },
   created(){
     this.$parent.$on('setDate', this.setDate);
+
+    for(let i = 1; i < 24; i++){
+      if(i < 10) this.timeArr.push('0'+i)
+      else this.timeArr.push(i)
+    }
   },
 }
 </script>
