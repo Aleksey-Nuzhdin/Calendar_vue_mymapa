@@ -1,7 +1,11 @@
 <template>
-  <div class="field" id='scroll'>
-    <div class="filed__wrap"
+  <div class="field__wrap"
+    @wheel.prevent="wheel"
+    ref="field__wrap"
+  >
+    <div class="field"
       :style="{ top:scroll+'px' }"
+      ref="field"
     >
       <ul class="time__list">
         <li class="hour"
@@ -10,13 +14,9 @@
         {{time}}:00</li>
       </ul>
       <ul class="day__list">
-        <li class="day__item"></li>
-        <li class="day__item"></li>
-        <li class="day__item"></li>
-        <li class="day__item"></li>
-        <li class="day__item"></li>
-        <li class="day__item"></li>
-        <li class="day__item"></li>
+        <li class="day__item"
+          v-for="(day, index) in dayList" :key="index"
+        ></li>
       </ul>
     </div>
   </div>
@@ -25,10 +25,13 @@
 <script>
 export default {
   name: 'Field',
-  props:['scroll','from','to'],
+  props:['from','to','dayList'],
   data:()=>({
     setFrom: 0,
     setTo: 0,
+    scroll: 0,
+    fieldHeight: 0,
+    fieldWrapHeight: 0,
     timeArr: []
   }),
   methods:{
@@ -36,6 +39,25 @@ export default {
       this.setFrom = +this.from
       this.setTo = +this.to
     },
+    wheel(e){
+      console.log(this.fieldWrapHeight, this.fieldHeight);
+      if(e.deltaY < 0){
+        if((this.scroll - e.deltaY*10) > 0 ){
+           this.scroll = 0
+        }else{
+           this.scroll -= e.deltaY*10
+        }
+      }else{
+        if ((this.scroll - e.deltaY*10) < (this.fieldWrapHeight - this.fieldHeight)) {
+          this.scroll = this.fieldWrapHeight - this.fieldHeight
+        } else {
+          this.scroll -= e.deltaY*10
+        }
+        
+      }
+
+      
+    }
   },
   created(){
     this.$parent.$on('setDate', this.setDate);
@@ -45,18 +67,23 @@ export default {
       else this.timeArr.push(i)
     }
   },
+  mounted(){
+    console.log(this.$refs);
+    this.fieldHeight =  this.$refs.field.clientHeight;
+    this.fieldWrapHeight =  this.$refs.field__wrap.clientHeight;
+  }
 }
 </script>
 
 <style scoped lang="scss">
-.field{
+.field__wrap{
   position: relative;
   width: 100%;
   max-height: calc(100vh - 300px);
   min-height: 300px;
-  height: 70vh;
+  height: 1100px;
 }
-.filed__wrap{
+.field{
   position: absolute;
   display: flex;
   top: 0;

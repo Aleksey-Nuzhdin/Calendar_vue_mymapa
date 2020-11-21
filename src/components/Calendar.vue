@@ -4,26 +4,19 @@
     <div class="calendar">
       <ul class="date__list">
         <div class="gmt"><span>GMT+03</span></div> 
-        <li class="date__item">
-          <span class="day_week">ПН</span>
-          <span class="number">19</span>
-        </li>
-        <li class="date__item">
-          <span class="day_week">ВТ</span>
-          <span class="number">20</span>
-        </li>
-        <li class="date__item">
-          <span class="day_week">{{dateFilrer(toDo[3].startDate,{weekday:'short'}).toUpperCase()}}</span>
-          <span class="number">{{dateFilrer(toDo[3].startDate,{day:'2-digit'})}}</span>
+        <li class="date__item"
+          v-for="(day, index) in dayList" :key="index"
+        >
+          <span class="day_week">{{day.weekDay.toUpperCase()}}</span>
+          <span class="number">{{day.day}}</span>
         </li>
       </ul>
       <Field 
         :scroll='scroll'
         :from='from'
         :to='to'
+        :dayList='dayList'
       />
-      <a @click.prevent='scrollUp' class="scrollBtn scrollUp">Up</a>
-      <a @click.prevent='scrollDown' class="scrollBtn scrollDown">Down</a> 
     </div>
     <form class="setDate"
         @submit.prevent='submit'
@@ -57,7 +50,6 @@ import Field from './Field'
 export default {
   name: 'Calendar',
   data:()=>({
-    scroll: 0,
     from: 0,
     to: 0,
     toDo:[
@@ -67,23 +59,43 @@ export default {
           {"title": "Заголовок 4", "startDate": 1586307600, "endDate": 1586311200},
           {"title": "Заголовок 5", "startDate": 1585791500, "endDate": 1585795100},
           {"title": "Заголовок 6", "startDate": 1585706400, "endDate": 1585710000}
-        ]
+        ],
+    dayList:[]
 
   }),
   methods:{
-    scrollUp(){
-      this.scroll += 50
-    },
-    scrollDown(){
-      this.scroll -= 50
-    },
     submit(){
+      this.setDayList()
       this.$emit('setDate')
     },
     dateFilrer(val, options, lang='ru-RU'){
-      const date = new Date(val*1000)
+      const date = new Date(val)
       return new Intl.DateTimeFormat(lang, options).format(date)
+    },
+    setDayList(){
+      const fromDate = new Date(this.from)
+      const toDate = new Date(this.to)
+      this.dayList =[]
+      
+      while(true){
+        console.log(fromDate);
+        let weekDay = this.dateFilrer(fromDate, {weekday:'short'})
+        let day = this.dateFilrer(fromDate, {day:'2-digit'})
+        this.dayList.push({
+          day,
+          weekDay,
+        })
+        if(fromDate.getDate() === toDate.getDate() && fromDate.getMonth() === toDate.getMonth()) break
+        fromDate.setDate(fromDate.getDate() + 1)
+      }
     }
+  },
+  created(){
+    //По умолчанию показывать 7 дней начиная с сегодняшнего
+    this.from = Date.now()
+    this.to = Date.now() + (6*24*60*60*1000)
+    this.setDayList()
+    
   },
   components:{ Field, }
 }
