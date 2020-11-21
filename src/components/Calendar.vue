@@ -15,7 +15,7 @@
         :from='from'
         :to='to'
         :dayList='dayList'
-        :toDo='toDo'
+        :toDo='toDoList'
       />
     </div>
     <form class="setDate"
@@ -65,7 +65,8 @@ export default {
           {"title": "Заголовок 5", "startDate": 1585791500, "endDate": 1585795100},
           {"title": "Заголовок 6", "startDate": 1585706400, "endDate": 1585710000}
         ],
-    dayList:[]
+    dayList:[],
+    toDoList:[],
 
   }),
   methods:{
@@ -77,6 +78,7 @@ export default {
       this.from = 1585699200000
       this.to = 1585699200000 + (7*24*60*60*1000)
       this.setDayList()
+      this.setToDoList()
     },
     dateFilrer(val, options, lang='ru-RU'){
       const date = new Date(val)
@@ -86,7 +88,6 @@ export default {
       const fromDate = new Date(this.from)
       const toDate = new Date(this.to)
       let fromSec =  Math.floor(this.from/1000)
-      console.log(fromDate, toDate);
       this.dayList =[]
       
       while(true){
@@ -103,9 +104,24 @@ export default {
         fromSec+=(24*60*60)
       }
     },
+    setToDoList(){
+      console.log('h');
+      this.toDoList = this.dayList.map((eList, inx)=>{ console.log(1); return (
+          this.toDo.filter((eDo)=>{
+            //Исправляем, если вермя начала позже времяени окончания
+            if(eDo.startDate > eDo.endDate){
+              let val = eDo.startDate
+              eDo.startDate = eDo.endDate
+              eDo.endDate = val
+            }
+            console.log(eDo.startDate, eList.from, eDo.endDate, eList.to);
+            if(eDo.startDate >= eList.from && eDo.endDate <= eList.to) return eDo
+        }))
+      })
+    },
     correctionDateDay(date){
       //Поулчает UTC региона, для корекктного отображения
-      const UTC = (new Date).getTimezoneOffset() * 60 * 1000
+      const UTC = this.UTC
 
       //Приравнеием время к 00:00
       return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC + 1
@@ -116,7 +132,11 @@ export default {
     this.from = this.correctionDateDay(Date.now())
     this.to = this.from + (7*24*60*60*1000) - 1
     this.setDayList()
+    this.setToDoList()
     
+  },
+  computed:{
+    UTC:() => ((new Date).getTimezoneOffset() * 60 * 1000),
   },
   components:{ Field, }
 }
@@ -213,3 +233,6 @@ export default {
 }
 
 </style>
+
+
+

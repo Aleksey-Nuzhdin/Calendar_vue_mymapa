@@ -17,10 +17,8 @@
         <li class="day__item"
           v-for="(day, index) in dayList" :key="index"
         >
-          {{day.from}} {{day.to}}
           <div class="toDo__item"
-            v-for="(item, index) in toDo" :key="index"
-            v-if="day.from <= item.startDate && day.to >= item.endDate"
+            v-for="(item, ind) in toDo[index]" :key="ind"
           >
           {{item.title}}
           </div>
