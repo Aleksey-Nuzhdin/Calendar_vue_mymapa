@@ -12,10 +12,10 @@
         </li>
       </ul>
       <Field 
-        :scroll='scroll'
         :from='from'
         :to='to'
         :dayList='dayList'
+        :toDo='toDo'
       />
     </div>
     <form class="setDate"
@@ -41,6 +41,11 @@
           Показать
         </button>
       </form>
+        <button
+            @click="setDateExaple"
+        >
+          Задание
+        </button>
   </div>
 </template>
 
@@ -68,6 +73,11 @@ export default {
       this.setDayList()
       this.$emit('setDate')
     },
+    setDateExaple(){
+      this.from = 1585699200000
+      this.to = 1585699200000 + (7*24*60*60*1000)
+      this.setDayList()
+    },
     dateFilrer(val, options, lang='ru-RU'){
       const date = new Date(val)
       return new Intl.DateTimeFormat(lang, options).format(date)
@@ -75,25 +85,36 @@ export default {
     setDayList(){
       const fromDate = new Date(this.from)
       const toDate = new Date(this.to)
+      let fromSec =  Math.floor(this.from/1000)
+      console.log(fromDate, toDate);
       this.dayList =[]
       
       while(true){
-        console.log(fromDate);
         let weekDay = this.dateFilrer(fromDate, {weekday:'short'})
         let day = this.dateFilrer(fromDate, {day:'2-digit'})
         this.dayList.push({
           day,
           weekDay,
+          from: fromSec,
+          to: fromSec + (24*60*60),
         })
         if(fromDate.getDate() === toDate.getDate() && fromDate.getMonth() === toDate.getMonth()) break
         fromDate.setDate(fromDate.getDate() + 1)
+        fromSec+=(24*60*60)
       }
-    }
+    },
+    correctionDateDay(date){
+      //Поулчает UTC региона, для корекктного отображения
+      const UTC = (new Date).getTimezoneOffset() * 60 * 1000
+
+      //Приравнеием время к 00:00
+      return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC + 1
+    },
   },
-  created(){
+  created(){   
     //По умолчанию показывать 7 дней начиная с сегодняшнего
-    this.from = Date.now()
-    this.to = Date.now() + (6*24*60*60*1000)
+    this.from = this.correctionDateDay(Date.now())
+    this.to = this.from + (7*24*60*60*1000) - 1
     this.setDayList()
     
   },

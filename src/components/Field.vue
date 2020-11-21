@@ -1,6 +1,6 @@
 <template>
   <div class="field__wrap"
-    @wheel.prevent="wheel"
+    @wheel.prevent="setScroll"
     ref="field__wrap"
   >
     <div class="field"
@@ -16,7 +16,15 @@
       <ul class="day__list">
         <li class="day__item"
           v-for="(day, index) in dayList" :key="index"
-        ></li>
+        >
+          {{day.from}} {{day.to}}
+          <div class="toDo__item"
+            v-for="(item, index) in toDo" :key="index"
+            v-if="day.from <= item.startDate && day.to >= item.endDate"
+          >
+          {{item.title}}
+          </div>
+        </li>
       </ul>
     </div>
   </div>
@@ -25,7 +33,7 @@
 <script>
 export default {
   name: 'Field',
-  props:['from','to','dayList'],
+  props:['from','to','dayList','toDo'],
   data:()=>({
     setFrom: 0,
     setTo: 0,
@@ -39,8 +47,7 @@ export default {
       this.setFrom = +this.from
       this.setTo = +this.to
     },
-    wheel(e){
-      console.log(this.fieldWrapHeight, this.fieldHeight);
+    setScroll(e){
       if(e.deltaY < 0){
         if((this.scroll - e.deltaY*10) > 0 ){
            this.scroll = 0
@@ -52,11 +59,8 @@ export default {
           this.scroll = this.fieldWrapHeight - this.fieldHeight
         } else {
           this.scroll -= e.deltaY*10
-        }
-        
-      }
-
-      
+        }     
+      }  
     }
   },
   created(){
@@ -68,7 +72,6 @@ export default {
     }
   },
   mounted(){
-    console.log(this.$refs);
     this.fieldHeight =  this.$refs.field.clientHeight;
     this.fieldWrapHeight =  this.$refs.field__wrap.clientHeight;
   }
@@ -129,5 +132,7 @@ export default {
   background-repeat: repeat;
 
 }
-
+.toDo__item{
+  background-color: rgb(22, 105, 14);
+}
 </style>
