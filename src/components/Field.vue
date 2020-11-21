@@ -15,7 +15,7 @@
       </ul>
       <ul class="day__list">
         <li class="day__item"
-          v-for="(day, index) in dayList" :key="index"
+          v-for="(day, index) of dayList" :key="index"
         >
           <div class="toDo__item"
             v-for="(item, ind) in toDo[index]" :key="ind"
@@ -62,7 +62,7 @@ export default {
     }
   },
   created(){
-    this.$parent.$on('setDate', this.setDate);
+    //this.$parent.$on('setDate', this.setDate);
 
     for(let i = 1; i < 24; i++){
       if(i < 10) this.timeArr.push('0'+i)
@@ -80,7 +80,7 @@ export default {
 .field__wrap{
   position: relative;
   width: 100%;
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 400px);
   min-height: 300px;
   height: 1100px;
 }
@@ -91,6 +91,7 @@ export default {
 }
 .time__list{
   padding-top: 24px;
+  padding-bottom: 24px;
   height: 100%;
   width: 80px;
   color: #717171;
@@ -131,6 +132,11 @@ export default {
 
 }
 .toDo__item{
-  background-color: rgb(22, 105, 14);
+  display: inline-block;
+  background-color: rgb(167, 230, 52);
+  padding: 5px;
+  color: #474646;
+  border: 1px solid #d6d4d4;
+  border-radius: 4px;
 }
 </style>

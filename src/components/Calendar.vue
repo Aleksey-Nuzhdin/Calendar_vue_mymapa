@@ -19,28 +19,46 @@
       />
     </div>
     <form class="setDate"
-        @submit.prevent='submit'
+      @submit.prevent='submit'
+    >
+      <div class="setDate__wrpa">
+        <div class="form_tilt">ОТ</div>
+        <div class="input__wrap"
+          v-for="(item, key) of fromDate" :key="key"
+        >
+          <label for="from">{{key}}</label>
+          <input
+            :id='key'
+            class="input_date"
+            type="text"
+            
+            v-model="fromDate[key]"
+          >
+        </div>
+      </div>
+      <div class="setDate__wrpa">
+        <div class="form_tilt">ДО</div>
+        <div class="input__wrap"
+          v-for="(item, key) of toDate" :key="item"
+        >
+          <label for="from">{{key}}</label>
+          <input
+            :id='key'
+            class="input_date"
+            type="text"
+            
+            v-model="toDate[key]"
+          >
+        </div>
+      </div>
+      
+      <button
+          class=""
+          type="submit"
       >
-        <label for="from">От</label>
-        <input
-            id="from"
-            type="text"
-            v-model="from"
-        >
-        
-        <label for="to">До</label>
-        <input
-            id="to"
-            type="text"
-            v-model="to"
-        >
-        <button
-            class=""
-            type="submit"
-        >
-          Показать
-        </button>
-      </form>
+        Показать
+      </button>
+    </form>
         <button
             @click="setDateExaple"
         >
@@ -55,6 +73,8 @@ import Field from './Field'
 export default {
   name: 'Calendar',
   data:()=>({
+    fromDate:{year:2020, month:11, day:0},
+    toDate:{year:2020, month:11, day:0},
     from: 0,
     to: 0,
     toDo:[
@@ -71,8 +91,19 @@ export default {
   }),
   methods:{
     submit(){
+      const from = new Date(this.fromDate.year, this.fromDate.month-1, this.fromDate.day)
+      const to = new Date(this.toDate.year, this.toDate.month-1, this.toDate.day)
+      this.from = from.valueOf()
+      this.to = to.valueOf()
+      
+      if(this.from > this.to){
+        let val = this.from
+        this.from = this.to
+        this.to = val
+      }
+ 
       this.setDayList()
-      this.$emit('setDate')
+      this.setToDoList()
     },
     setDateExaple(){
       this.from = 1585699200000
@@ -105,8 +136,7 @@ export default {
       }
     },
     setToDoList(){
-      console.log('h');
-      this.toDoList = this.dayList.map((eList, inx)=>{ console.log(1); return (
+      this.toDoList = this.dayList.map((eList, inx)=>{ return (
           this.toDo.filter((eDo)=>{
             //Исправляем, если вермя начала позже времяени окончания
             if(eDo.startDate > eDo.endDate){
@@ -114,17 +144,18 @@ export default {
               eDo.startDate = eDo.endDate
               eDo.endDate = val
             }
-            console.log(eDo.startDate, eList.from, eDo.endDate, eList.to);
             if(eDo.startDate >= eList.from && eDo.endDate <= eList.to) return eDo
         }))
       })
     },
-    correctionDateDay(date){
+    correctionDateDay(date, type = 'start'){
       //Поулчает UTC региона, для корекктного отображения
       const UTC = this.UTC
 
-      //Приравнеием время к 00:00
-      return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC + 1
+      //Приравнеием время к 00:00 или к 24:00
+      if(type === 'start') return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC
+      if(type === 'end') return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC + (24*60*60*1000) - 1
+      Error('Wrong type');
     },
   },
   created(){   
@@ -215,23 +246,12 @@ export default {
   font-size: 40px;
 }
 
-.scrollBtn{
-  position: absolute;
+.setDate{
+  display: flex;
+}
+.setDate__wrap{
   display: block;
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  background-color: rgb(7, 190, 68);
 }
-.scrollUp{
-  right: 50px;
-  bottom: 150px;
-}
-.scrollDown{
-  right: 50px;
-  bottom: 100px;
-}
-
 </style>
 
 
