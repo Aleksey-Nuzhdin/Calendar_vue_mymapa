@@ -15,10 +15,12 @@
       </ul>
       <ul class="day__list">
         <li class="day__item"
+          ref="day__item"
           v-for="(day, index) of dayList" :key="index"
         >
           <div class="toDo__item"
             v-for="(item, ind) in toDo[index]" :key="ind"
+            :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px' }"
           >
           {{item.title}}
           </div>
@@ -38,6 +40,8 @@ export default {
     scroll: 0,
     fieldHeight: 0,
     fieldWrapHeight: 0,
+    dayItemWidth: 0,
+    dayItemHeight: 0,
     timeArr: []
   }),
   methods:{
@@ -72,6 +76,8 @@ export default {
   mounted(){
     this.fieldHeight =  this.$refs.field.clientHeight;
     this.fieldWrapHeight =  this.$refs.field__wrap.clientHeight;
+    this.dayItemWidth =  this.$refs.day__item[0].clientWidth;
+    this.dayItemHeight =  this.$refs.day__item[0].clientHeight;
   }
 }
 </script>
@@ -133,10 +139,11 @@ export default {
 }
 .toDo__item{
   display: inline-block;
+  position: absolute;
   background-color: rgb(167, 230, 52);
   padding: 5px;
   color: #474646;
-  border: 1px solid #d6d4d4;
+  border: 2px solid white;
   border-radius: 4px;
 }
 </style>

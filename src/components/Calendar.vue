@@ -3,7 +3,7 @@
     <h1 class="title">Календарь</h1>
     <div class="calendar">
       <ul class="date__list">
-        <div class="gmt"><span>GMT+03</span></div> 
+        <div class="gmt"><span>GMT{{GMT}}</span></div> 
         <li class="date__item"
           v-for="(day, index) in dayList" :key="index"
         >
@@ -77,6 +77,7 @@ export default {
     toDate:{year:2020, month:11, day:0},
     from: 0,
     to: 0,
+    GMT: '00',
     toDo:[
           {"title": "Заголовок 1", "startDate": 1585699200, "endDate": 1585702800},
           {"title": "Заголовок 2", "startDate": 1585706400, "endDate": 1585710000},
@@ -119,7 +120,7 @@ export default {
       const fromDate = new Date(this.from)
       const toDate = new Date(this.to)
       let fromSec =  Math.floor(this.from/1000)
-      this.dayList =[]
+      this.dayList = []
       
       while(true){
         let weekDay = this.dateFilrer(fromDate, {weekday:'short'})
@@ -136,6 +137,7 @@ export default {
       }
     },
     setToDoList(){
+      //Распределяем "дела" по дням их выполнения
       this.toDoList = this.dayList.map((eList, inx)=>{ return (
           this.toDo.filter((eDo)=>{
             //Исправляем, если вермя начала позже времяени окончания
@@ -144,21 +146,43 @@ export default {
               eDo.startDate = eDo.endDate
               eDo.endDate = val
             }
+            //Возвращаем "дела", время которых выпадает на нужный день
             if(eDo.startDate >= eList.from && eDo.endDate <= eList.to) return eDo
         }))
       })
+      //Модифицируем для отображения
+      this.toDoList = this.toDoList.map((arr)=>{return (arr.map((el)=>{
+        if(arr.length > 0){
+          //коэффициент сколько времени прошло от 00:00 до времени начала "дела"
+          el.coefTop = (el.startDate % (24*60*60))/(24*60*60)
+          //коэффициент сколько времени длилось "дело"
+          el.coefHeight = (el.endDate - el.startDate)/(24*60*60)
+        }
+        return el
+      }))})
     },
     correctionDateDay(date, type = 'start'){
-      //Поулчает UTC региона, для корекктного отображения
+      //Поулчает UTC региона, для коррекции времени
       const UTC = this.UTC
-
       //Приравнеием время к 00:00 или к 24:00
       if(type === 'start') return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC
       if(type === 'end') return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC + (24*60*60*1000) - 1
       Error('Wrong type');
     },
+    setGMT(){
+      if(this.UTC > 0){
+      this.GMT = '0'+(this.UTC / (60*1000*60))
+      this.GMT = this.GMT.slice(-2)
+      this.GMT ='-'+this.GMT
+      }else{
+      this.GMT = '0'+(-this.UTC / (60*1000*60))
+      this.GMT = this.GMT.slice(-2)
+      this.GMT ='+'+this.GMT
+     }
+    },
   },
   created(){   
+    this.setGMT()
     //По умолчанию показывать 7 дней начиная с сегодняшнего
     this.from = this.correctionDateDay(Date.now())
     this.to = this.from + (7*24*60*60*1000) - 1
