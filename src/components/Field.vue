@@ -13,16 +13,31 @@
         >
         {{time}}:00</li>
       </ul>
-      <ul class="day__list">
+      <ul class="day__list"
+        
+      >
         <li class="day__item"
           ref="day__item"
           v-for="(day, index) of dayList" :key="index"
+          @drop.prevent="drop($event)"
+          
+          @dragover.prevent='dragenter($event)'
         >
           <div class="toDo__item"
             v-for="(item, ind) in toDo[index]" :key="ind"
             :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px' }"
+            draggable="true"
+            @dragstart="dragstart($event)"
+            @dragend.prevent="dragend($event)"
+            @dragenter.prevent
+           
           >
           {{item.title}}
+          <div class="toDo__time"
+            v-if="(item.coefHeight * dayItemHeight) > 50"
+          >
+            {{item.timeStart}}-{{item.timeEnd}}
+          </div>
           </div>
         </li>
       </ul>
@@ -42,6 +57,7 @@ export default {
     fieldWrapHeight: 0,
     dayItemWidth: 0,
     dayItemHeight: 0,
+    dragged: undefined,
     timeArr: []
   }),
   methods:{
@@ -63,6 +79,28 @@ export default {
           this.scroll -= e.deltaY*10
         }     
       }  
+    },
+    dragstart(e){
+      //console.log(e);
+      this.dragged = e.target
+      //console.log(this.dragged, 11);
+      e.target.style.opacity = 0.5;
+      //e.dataTransfer.setData('text/plain', 'dummy');
+    },
+    drop(e){
+      //console.log(1);
+      console.log(e);
+    },
+    dragend(e){
+      //console.log(e.screenY);
+      //console.log(e.target.style.top);
+      //console.log(this.toDo[0][0]);
+      //this.toDo[0][0].coefTop+= 0.005
+      e.target.style.opacity = ''; 
+    },
+    dragenter(e){
+      //console.log(e);
+      
     }
   },
   created(){
@@ -138,12 +176,15 @@ export default {
 
 }
 .toDo__item{
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
   position: absolute;
   background-color: rgb(167, 230, 52);
   padding: 5px;
   color: #474646;
   border: 2px solid white;
-  border-radius: 4px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 </style>

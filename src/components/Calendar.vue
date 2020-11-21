@@ -79,11 +79,11 @@ export default {
     to: 0,
     GMT: '00',
     toDo:[
-          {"title": "Заголовок 1", "startDate": 1585699200, "endDate": 1585702800},
-          {"title": "Заголовок 2", "startDate": 1585706400, "endDate": 1585710000},
+          {"title": "Заголовок 1", "startDate": 1585699200, "endDate": 1585703800},
           {"title": "Заголовок 3", "startDate": 1585789200, "endDate": 1585792800},
-          {"title": "Заголовок 4", "startDate": 1586307600, "endDate": 1586311200},
+          {"title": "Заголовок 4", "startDate": 1586307600, "endDate": 1586315200},
           {"title": "Заголовок 5", "startDate": 1585791500, "endDate": 1585795100},
+          {"title": "Заголовок 2", "startDate": 1585706400, "endDate": 1585710000},
           {"title": "Заголовок 6", "startDate": 1585706400, "endDate": 1585710000}
         ],
     dayList:[],
@@ -154,19 +154,20 @@ export default {
       this.toDoList = this.toDoList.map((arr)=>{return (arr.map((el)=>{
         if(arr.length > 0){
           //коэффициент сколько времени прошло от 00:00 до времени начала "дела"
-          el.coefTop = (el.startDate % (24*60*60))/(24*60*60)
+          el.coefTop = ( (el.startDate - (this.UTC/1000) ) % (24*60*60))/(24*60*60)
           //коэффициент сколько времени длилось "дело"
           el.coefHeight = (el.endDate - el.startDate)/(24*60*60)
+          //время в часах и минутах
+          el.timeStart = this.dateFilrer(el.startDate*1000, {hour:'2-digit',minute:'2-digit'})
+          el.timeEnd = this.dateFilrer(el.endDate*1000, {hour:'2-digit',minute:'2-digit'})
         }
         return el
       }))})
     },
     correctionDateDay(date, type = 'start'){
-      //Поулчает UTC региона, для коррекции времени
-      const UTC = this.UTC
       //Приравнеием время к 00:00 или к 24:00
-      if(type === 'start') return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC
-      if(type === 'end') return Math.floor((date) /(24*60*60*1000)) * (24*60*60*1000) + UTC + (24*60*60*1000) - 1
+      if(type === 'start') return Math.floor((date - this.UTC) / (24*60*60*1000)) * (24*60*60*1000) + this.UTC
+      if(type === 'end') return Math.floor((date - this.UTC) /(24*60*60*1000)) * (24*60*60*1000) + this.UTC + (24*60*60*1000) - 1
       Error('Wrong type');
     },
     setGMT(){
@@ -191,6 +192,7 @@ export default {
     
   },
   computed:{
+    //UTC региона, для коррекции времени
     UTC:() => ((new Date).getTimezoneOffset() * 60 * 1000),
   },
   components:{ Field, }
