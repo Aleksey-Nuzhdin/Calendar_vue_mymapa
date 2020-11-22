@@ -22,11 +22,11 @@
           
           @dragenter.self="dragenter($event)" 
           @dragover.prevent=''
-          @drop.prevent.self="drop($event)"
+          @drop.prevent="drop($event)"
         >
           <div class="toDo__item"
             v-for="(item, ind) in toDo[index]" :key="ind"
-            :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px', left:(item.coefLeft)*30 + 'px' }"
+            :style="{top:(item.coefTop * dayItemHeight)+'px', minHeight:(item.coefHeight * dayItemHeight)+'px', left:(item.coefLeft)*30 + 'px' }"
             draggable="true"
             @dragstart.self="dragstart( item, $event,)"
             @dragend.prevent="dragend($event)"
@@ -34,11 +34,12 @@
            
           >
           {{item.title}}
-          <div class="toDo__time"
+          <span class="toDo__itemtext"
+            @drop.prevent=''
             v-if="(item.coefHeight * dayItemHeight) > 50"
           >
             {{item.timeStart}}-{{item.timeEnd}}
-          </div>
+          </span>
           </div>
         </li>
       </ul>
@@ -90,7 +91,7 @@ export default {
       }  
     },
     dragstart(item, e){
-      //console.log(e.target.offsetWidth, );
+      //console.log(e );
 
       e.dataTransfer.dropEffect = 'move'
       e.dataTransfer.effectAllowed = 'uninitialized'
@@ -118,19 +119,42 @@ export default {
       
     },
     drop(e){
-    
-      let endListIndex = Array.prototype.indexOf.call(
-        e.target.offsetParent.children, 
-        e.target)
-      
-      let startListIndex = parseInt(e.dataTransfer.getData('startListIndex'))
+      console.log(e);
+      let endListIndex
+      let height
+
+      if(e.target.className == "toDo__item"){
+        endListIndex = Array.prototype.indexOf.call(
+          e.target.offsetParent.offsetParent.children, 
+          e.target.offsetParent)
+
+        height = e.target.offsetParent.offsetHeight
+      }else{
+        endListIndex = Array.prototype.indexOf.call(
+          e.target.offsetParent.children, 
+          e.target)
+
+        height = e.target.offsetHeight
+      }
+
+      if(e.target.className == "toDo__itemtext"){
+        endListIndex = Array.prototype.indexOf.call(
+          e.target.offsetParent.offsetParent.offsetParent.children, 
+          e.target.offsetParent.offsetParent)
+
+        height = e.target.offsetParent.offsetParent.offsetHeight
+      }
+
+      console.log();
+      //let startListIndex = parseInt(e.dataTransfer.getData('startListIndex'))
       //let itemIndex = this.toDo[startListIndex].indexOf(this.dragItem)
-      let moveY = e.layerY - parseInt(e.dataTransfer.getData('shiftY'))
+      console.log(e.pageY, this.scroll, parseInt(e.dataTransfer.getData('shiftY')) );
+      let moveY = e.pageY - this.scroll - parseInt(e.dataTransfer.getData('shiftY')) - 200
       //let moveX = e.layerX - parseInt(e.dataTransfer.getData('shiftX'))
       //let widthItem = parseInt(e.dataTransfer.getData('width'))
       let heightItem = parseInt(e.dataTransfer.getData('heightItem'))
       //let width = e.target.offsetWidth
-      let height = e.target.offsetHeight
+      
 
       //Ограничиваем смещение
       //if(moveX < 0) moveX = 0
@@ -166,6 +190,8 @@ export default {
     this.fieldWrapHeight =  this.$refs.field__wrap.clientHeight;
     this.dayItemWidth =  this.$refs.day__item[0].clientWidth;
     this.dayItemHeight =  this.$refs.day__item[0].clientHeight;
+    //this.$refs.day__item.addEventListener(drop , this.drop($event), {capture: true})
+    
   }
 }
 </script>
@@ -239,5 +265,6 @@ export default {
   cursor: pointer;
   user-select: none;
   max-width: 80%;
+  text-overflow: clip;
 }
 </style>

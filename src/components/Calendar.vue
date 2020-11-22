@@ -181,10 +181,9 @@ export default {
           for(let k = j+1; k < arr.length; k++){
                  
             if( 
-              Math.abs(arr[j].startDate - arr[k].startDate) < 1000 && 
-              Math.abs(arr[j].endDate - arr[k].endDate) < 1000
+              Math.abs(arr[j].startDate - arr[k].startDate) < 1200 && 
+              Math.abs(arr[j].endDate - arr[k].endDate) < 1200
             ){   
-              console.log(arr[j].timeStart === arr[k].timeStart && arr[j].timeEnd === arr[k].timeEnd);
               arr[j].coefLeft += 1
             }
           }
