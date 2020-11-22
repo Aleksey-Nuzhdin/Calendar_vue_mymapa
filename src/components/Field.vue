@@ -1,45 +1,40 @@
 <template>
-  <div class="field__wrap"
-    @wheel.prevent="setScroll"
-    ref="field__wrap"
-  >
-    <div class="field"
-      :style="{ top:scroll+'px' }"
-      ref="field"
-    >
+  <div class="field__wrap" @wheel.prevent="setScroll" ref="field__wrap">
+    <div class="field" :style="{ top: scroll + 'px' }" ref="field">
       <ul class="time__list">
-        <li class="hour"
-          v-for="time in timeArr" :key="time"
-        >
-        {{time}}:00</li>
+        <li class="hour" v-for="time in timeArr" :key="time">{{ time }}:00</li>
       </ul>
-      <ul class="day__list"
-        
-      >
-        <li class="day__item"
+      <ul class="day__list">
+        <li
+          class="day__item"
           ref="day__item"
-          v-for="(day, index) of dayList" :key="index"
-          
-          @dragenter.self="dragenter($event)" 
-          @dragover.prevent=''
+          v-for="(day, index) of dayList"
+          :key="index"
+          @dragenter.self="dragenter($event)"
+          @dragover.prevent=""
           @drop.prevent="drop($event)"
         >
-          <div class="toDo__item"
-            v-for="(item, ind) in toDo[index]" :key="ind"
-            :style="{top:(item.coefTop * dayItemHeight)+'px', minHeight:(item.coefHeight * dayItemHeight)+'px', left:(item.coefLeft)*30 + 'px' }"
+          <div
+            class="toDo__item"
+            v-for="(item, ind) in toDo[index]"
+            :key="ind"
+            :style="{
+              top: item.coefTop * dayItemHeight + 'px',
+              minHeight: item.coefHeight * dayItemHeight + 'px',
+              left: item.coefLeft * 30 + 'px',
+            }"
             draggable="true"
-            @dragstart.self="dragstart( item, $event,)"
+            @dragstart.self="dragstart(item, $event)"
             @dragend.prevent="dragend($event)"
-            
-           
           >
-          {{item.title}}
-          <span class="toDo__itemtext"
-            @drop.prevent=''
-            v-if="(item.coefHeight * dayItemHeight) > 50"
-          >
-            {{item.timeStart}}-{{item.timeEnd}}
-          </span>
+            {{ item.title }}
+            <span
+              class="toDo__itemtext"
+              @drop.prevent=""
+              v-if="item.coefHeight * dayItemHeight > 50"
+            >
+              {{ item.timeStart }}-{{ item.timeEnd }}
+            </span>
           </div>
         </li>
       </ul>
@@ -49,9 +44,9 @@
 
 <script>
 export default {
-  name: 'Field',
-  props:['from','to','dayList','toDo','setToDoList'],
-  data:()=>({
+  name: "Field",
+  props: ["from", "to", "dayList", "toDo", "setToDoList"],
+  data: () => ({
     setFrom: 0,
     setTo: 0,
     scroll: 0,
@@ -61,162 +56,148 @@ export default {
     dayItemHeight: 0,
     dragged: undefined,
     dragItem: {},
-    timeArr: []
+    timeArr: [],
   }),
-  methods:{
-    setDate(){
-      this.setFrom = +this.from
-      this.setTo = +this.to
+  methods: {
+    setDate() {
+      this.setFrom = +this.from;
+      this.setTo = +this.to;
     },
-    updataItem(top, dayIndex, item){
-      let time = item.parent.endDate - item.parent.startDate
-      item.parent.startDate = this.dayList[dayIndex].from + Math.floor((top / this.dayItemHeight)*(24*60*60))
-      item.parent.endDate = item.parent.startDate + time
-
-      //top = item.coefTop * dayItemHeight
+    updataItem(top, dayIndex, item) {
+      //Обновляем значения времени начала и конца
+      let time = item.parent.endDate - item.parent.startDate;
+      item.parent.startDate =
+        this.dayList[dayIndex].from +
+        Math.floor((top / this.dayItemHeight) * (24 * 60 * 60));
+      item.parent.endDate = item.parent.startDate + time;
     },
-    setScroll(e){
-      if(e.deltaY < 0){
-        if((this.scroll - e.deltaY*10) > 0 ){
-           this.scroll = 0
-        }else{
-           this.scroll -= e.deltaY*10
-        }
-      }else{
-        if ((this.scroll - e.deltaY*10) < (this.fieldWrapHeight - this.fieldHeight)) {
-          this.scroll = this.fieldWrapHeight - this.fieldHeight
+    setScroll(e) {
+      if (e.deltaY < 0) {
+        if (this.scroll - e.deltaY * 10 > 0) {
+          this.scroll = 0;
         } else {
-          this.scroll -= e.deltaY*10
-        }     
-      }  
+          this.scroll -= e.deltaY * 10;
+        }
+      } else {
+        if (
+          this.scroll - e.deltaY * 10 <
+          this.fieldWrapHeight - this.fieldHeight
+        ) {
+          this.scroll = this.fieldWrapHeight - this.fieldHeight;
+        } else {
+          this.scroll -= e.deltaY * 10;
+        }
+      }
     },
-    dragstart(item, e){
-      //console.log(e );
+    dragstart(item, e) {
+      e.dataTransfer.dropEffect = "move";
+      e.dataTransfer.effectAllowed = "uninitialized";
 
-      e.dataTransfer.dropEffect = 'move'
-      e.dataTransfer.effectAllowed = 'uninitialized'
+      this.dragged = e.target;
+      this.dragItem = item;
 
-      this.dragged = e.target
-      this.dragItem = item
-
-      //let shiftX = e.clientX - this.dragged.getBoundingClientRect().left;
       let shiftY = e.clientY - this.dragged.getBoundingClientRect().top;
 
       let startListIndex = Array.prototype.indexOf.call(
-        e.target.offsetParent.offsetParent.children, 
-        e.target.offsetParent)
+        e.target.offsetParent.offsetParent.children,
+        e.target.offsetParent
+      );
 
-      
+      //Перебрасываем значения
+      e.dataTransfer.setData("shiftY", shiftY);
+      e.dataTransfer.setData("heightItem", e.target.offsetHeight);
 
-      //e.dataTransfer.setData('startListIndex', startListIndex)
-      //e.dataTransfer.setData('shiftX', shiftX)
-      e.dataTransfer.setData('shiftY', shiftY)
-      //e.dataTransfer.setData('width', e.target.offsetWidth)
-      e.dataTransfer.setData('heightItem', e.target.offsetHeight)
-      
-      
       e.target.style.opacity = 0.5;
-      
     },
-    drop(e){
-      console.log(e);
-      let endListIndex
-      let height
+    drop(e) {
+      let endListIndex;
+      let height;
 
-      if(e.target.className == "toDo__item"){
+      //Если событие произошло на внутренних элементах
+      if (e.target.className == "toDo__item") {
         endListIndex = Array.prototype.indexOf.call(
-          e.target.offsetParent.offsetParent.children, 
-          e.target.offsetParent)
+          e.target.offsetParent.offsetParent.children,
+          e.target.offsetParent
+        );
 
-        height = e.target.offsetParent.offsetHeight
-      }else{
+        height = e.target.offsetParent.offsetHeight;
+      } else {
         endListIndex = Array.prototype.indexOf.call(
-          e.target.offsetParent.children, 
-          e.target)
+          e.target.offsetParent.children,
+          e.target
+        );
 
-        height = e.target.offsetHeight
+        height = e.target.offsetHeight;
       }
 
-      if(e.target.className == "toDo__itemtext"){
+      if (e.target.className == "toDo__itemtext") {
         endListIndex = Array.prototype.indexOf.call(
-          e.target.offsetParent.offsetParent.offsetParent.children, 
-          e.target.offsetParent.offsetParent)
+          e.target.offsetParent.offsetParent.offsetParent.children,
+          e.target.offsetParent.offsetParent
+        );
 
-        height = e.target.offsetParent.offsetParent.offsetHeight
+        height = e.target.offsetParent.offsetParent.offsetHeight;
       }
 
-      console.log();
-      //let startListIndex = parseInt(e.dataTransfer.getData('startListIndex'))
-      //let itemIndex = this.toDo[startListIndex].indexOf(this.dragItem)
-      console.log(e.pageY, this.scroll, parseInt(e.dataTransfer.getData('shiftY')) );
-      let moveY = e.pageY - this.scroll - parseInt(e.dataTransfer.getData('shiftY')) - 200
-      //let moveX = e.layerX - parseInt(e.dataTransfer.getData('shiftX'))
-      //let widthItem = parseInt(e.dataTransfer.getData('width'))
-      let heightItem = parseInt(e.dataTransfer.getData('heightItem'))
-      //let width = e.target.offsetWidth
-      
+      let moveY =
+        e.pageY -
+        this.scroll -
+        parseInt(e.dataTransfer.getData("shiftY")) -
+        200;
+      let heightItem = parseInt(e.dataTransfer.getData("heightItem"));
 
       //Ограничиваем смещение
-      //if(moveX < 0) moveX = 0
-      //if(moveX > width-widthItem) moveX = (width-widthItem)
 
-      if(moveY < 0) moveY = 0
-      if(moveY > height - heightItem) moveY = height - heightItem
-      
-      //this.dragged.style.top = moveY +'px'
-      //this.dragged.style.left = moveX +'px'
+      if (moveY < 0) moveY = 0;
+      if (moveY > height - heightItem) moveY = height - heightItem;
 
-      this.updataItem(moveY, endListIndex, this.dragItem)
-      this.setToDoList()
-    
+      //обновляем данные и перерисовываем
+      this.updataItem(moveY, endListIndex, this.dragItem);
+      this.setToDoList();
     },
-    dragend(e){
-      e.target.style.opacity = ''; 
+    dragend(e) {
+      e.target.style.opacity = "";
     },
-    dragenter(e){
+    dragenter(e) {
       //console.log(e);
-      
+    },
+  },
+  created() {
+    for (let i = 1; i < 24; i++) {
+      if (i < 10) this.timeArr.push("0" + i);
+      else this.timeArr.push(i);
     }
   },
-  created(){
-
-    for(let i = 1; i < 24; i++){
-      if(i < 10) this.timeArr.push('0'+i)
-      else this.timeArr.push(i)
-    }
+  mounted() {
+    this.fieldHeight = this.$refs.field.clientHeight;
+    this.fieldWrapHeight = this.$refs.field__wrap.clientHeight;
+    this.dayItemWidth = this.$refs.day__item[0].clientWidth;
+    this.dayItemHeight = this.$refs.day__item[0].clientHeight;
   },
-  mounted(){
-    this.fieldHeight =  this.$refs.field.clientHeight;
-    this.fieldWrapHeight =  this.$refs.field__wrap.clientHeight;
-    this.dayItemWidth =  this.$refs.day__item[0].clientWidth;
-    this.dayItemHeight =  this.$refs.day__item[0].clientHeight;
-    //this.$refs.day__item.addEventListener(drop , this.drop($event), {capture: true})
-    
-  }
-}
+};
 </script>
 
 <style scoped lang="scss">
-.field__wrap{
+.field__wrap {
   position: relative;
   width: 100%;
   max-height: calc(100vh - 400px);
   min-height: 300px;
   height: 1100px;
 }
-.field{
+.field {
   position: absolute;
   display: flex;
   top: 0;
 }
-.time__list{
+.time__list {
   padding-top: 24px;
   padding-bottom: 24px;
   height: 100%;
   width: 80px;
   color: #717171;
 }
-.hour{
+.hour {
   position: relative;
   display: flex;
   justify-content: right;
@@ -225,10 +206,10 @@ export default {
   width: 80px;
   padding-right: 18px;
 }
-.day__list{
+.day__list {
   position: relative;
   display: flex;
-  &:after{
+  &:after {
     content: "";
     display: block;
     position: absolute;
@@ -238,11 +219,9 @@ export default {
     background-image: linear-gradient(white 48px, #d6d4d4 2px);
     background-size: 200px 50px;
     background-repeat: repeat;
-  
   }
-  
 }
-.day__item{
+.day__item {
   position: relative;
   height: 100%;
   width: 200px;
@@ -250,9 +229,8 @@ export default {
   background-image: linear-gradient(white 48px, #d6d4d4 2px);
   background-size: 200px 50px;
   background-repeat: repeat;
-
 }
-.toDo__item{
+.toDo__item {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
