@@ -171,6 +171,25 @@ export default {
         }
         return el
       }))})
+      //Если 2 события в одно время задаём смещение
+      for(let i = 0; i < this.toDoList.length; i++){
+
+        let arr = this.toDoList[i]
+        for(let j = 0; j < arr.length; j++){
+
+          arr[j].coefLeft = 0
+          for(let k = j+1; k < arr.length; k++){
+                 
+            if( 
+              Math.abs(arr[j].startDate - arr[k].startDate) < 1000 && 
+              Math.abs(arr[j].endDate - arr[k].endDate) < 1000
+            ){   
+              console.log(arr[j].timeStart === arr[k].timeStart && arr[j].timeEnd === arr[k].timeEnd);
+              arr[j].coefLeft += 1
+            }
+          }
+        }
+      }
     },
     correctionDateDay(date, type = 'start'){
       //Приравнеием время к 00:00 или к 24:00

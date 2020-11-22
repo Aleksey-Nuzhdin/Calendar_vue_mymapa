@@ -26,7 +26,7 @@
         >
           <div class="toDo__item"
             v-for="(item, ind) in toDo[index]" :key="ind"
-            :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px' }"
+            :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px', left:(item.coefLeft)*30 + 'px' }"
             draggable="true"
             @dragstart.self="dragstart( item, $event,)"
             @dragend.prevent="dragend($event)"
@@ -238,6 +238,6 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
-  width: 80%;
+  max-width: 80%;
 }
 </style>
