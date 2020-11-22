@@ -28,7 +28,7 @@
             v-for="(item, ind) in toDo[index]" :key="ind"
             :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px' }"
             draggable="true"
-            @dragstart.self="dragstart($event)"
+            @dragstart.self="dragstart( item, $event,)"
             @dragend.prevent="dragend($event)"
             
            
@@ -49,7 +49,7 @@
 <script>
 export default {
   name: 'Field',
-  props:['from','to','dayList','toDo'],
+  props:['from','to','dayList','toDo','setToDoList'],
   data:()=>({
     setFrom: 0,
     setTo: 0,
@@ -59,12 +59,20 @@ export default {
     dayItemWidth: 0,
     dayItemHeight: 0,
     dragged: undefined,
+    dragItem: {},
     timeArr: []
   }),
   methods:{
     setDate(){
       this.setFrom = +this.from
       this.setTo = +this.to
+    },
+    updataItem(top, dayIndex, item){
+      let time = item.parent.endDate - item.parent.startDate
+      item.parent.startDate = this.dayList[dayIndex].from + Math.floor((top / this.dayItemHeight)*(24*60*60))
+      item.parent.endDate = item.parent.startDate + time
+
+      //top = item.coefTop * dayItemHeight
     },
     setScroll(e){
       if(e.deltaY < 0){
@@ -81,24 +89,61 @@ export default {
         }     
       }  
     },
-    dragstart(e){
-      this.dragged = e.target
+    dragstart(item, e){
+      //console.log(e.target.offsetWidth, );
 
-      let shiftX = e.clientX - this.dragged.getBoundingClientRect().left;
+      e.dataTransfer.dropEffect = 'move'
+      e.dataTransfer.effectAllowed = 'uninitialized'
+
+      this.dragged = e.target
+      this.dragItem = item
+
+      //let shiftX = e.clientX - this.dragged.getBoundingClientRect().left;
       let shiftY = e.clientY - this.dragged.getBoundingClientRect().top;
 
-      e.dataTransfer.setData('shiftX', shiftX)
+      let startListIndex = Array.prototype.indexOf.call(
+        e.target.offsetParent.offsetParent.children, 
+        e.target.offsetParent)
+
+      
+
+      //e.dataTransfer.setData('startListIndex', startListIndex)
+      //e.dataTransfer.setData('shiftX', shiftX)
       e.dataTransfer.setData('shiftY', shiftY)
+      //e.dataTransfer.setData('width', e.target.offsetWidth)
+      e.dataTransfer.setData('heightItem', e.target.offsetHeight)
       
       
       e.target.style.opacity = 0.5;
       
     },
     drop(e){
-      e.target.appendChild( this.dragged );
+    
+      let endListIndex = Array.prototype.indexOf.call(
+        e.target.offsetParent.children, 
+        e.target)
       
-      this.dragged.style.top = e.layerY - parseInt(e.dataTransfer.getData('shiftY')) +'px'
-      this.dragged.style.left = e.layerX - parseInt(e.dataTransfer.getData('shiftX')) +'px'
+      let startListIndex = parseInt(e.dataTransfer.getData('startListIndex'))
+      //let itemIndex = this.toDo[startListIndex].indexOf(this.dragItem)
+      let moveY = e.layerY - parseInt(e.dataTransfer.getData('shiftY'))
+      //let moveX = e.layerX - parseInt(e.dataTransfer.getData('shiftX'))
+      //let widthItem = parseInt(e.dataTransfer.getData('width'))
+      let heightItem = parseInt(e.dataTransfer.getData('heightItem'))
+      //let width = e.target.offsetWidth
+      let height = e.target.offsetHeight
+
+      //Ограничиваем смещение
+      //if(moveX < 0) moveX = 0
+      //if(moveX > width-widthItem) moveX = (width-widthItem)
+
+      if(moveY < 0) moveY = 0
+      if(moveY > height - heightItem) moveY = height - heightItem
+      
+      //this.dragged.style.top = moveY +'px'
+      //this.dragged.style.left = moveX +'px'
+
+      this.updataItem(moveY, endListIndex, this.dragItem)
+      this.setToDoList()
     
     },
     dragend(e){
@@ -172,6 +217,7 @@ export default {
   
 }
 .day__item{
+  position: relative;
   height: 100%;
   width: 200px;
   border-left: 2px solid #d6d4d4;
@@ -192,5 +238,6 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
+  width: 80%;
 }
 </style>

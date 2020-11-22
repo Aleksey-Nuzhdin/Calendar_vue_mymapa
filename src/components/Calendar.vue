@@ -16,6 +16,7 @@
         :to='to'
         :dayList='dayList'
         :toDo='toDoList'
+        :setToDoList='setToDoList'
       />
     </div>
     <form class="setDate"
@@ -111,6 +112,7 @@ export default {
       this.to = 1585699200000 + (7*24*60*60*1000)
       this.setDayList()
       this.setToDoList()
+      
     },
     dateFilrer(val, options, lang='ru-RU'){
       const date = new Date(val)
@@ -122,23 +124,24 @@ export default {
       let fromSec =  Math.floor(this.from/1000)
       this.dayList = []
       
+      //Создаём массив с обектами для отображения даты и дня недели
       while(true){
         let weekDay = this.dateFilrer(fromDate, {weekday:'short'})
         let day = this.dateFilrer(fromDate, {day:'2-digit'})
         this.dayList.push({
           day,
           weekDay,
-          from: fromSec,
-          to: fromSec + (24*60*60),
+          from: fromSec + (this.UTC/1000),
+          to: fromSec + (24*60*60) + (this.UTC/1000),
         })
-        if(fromDate.getDate() === toDate.getDate() && fromDate.getMonth() === toDate.getMonth()) break
+        if(fromDate.getDate() === toDate.getDate() && fromDate.getMonth() === toDate.getMonth() && fromDate.getFullYear() === toDate.getFullYear() ) break
         fromDate.setDate(fromDate.getDate() + 1)
         fromSec+=(24*60*60)
       }
     },
     setToDoList(){
       //Распределяем "дела" по дням их выполнения
-      const mass = this.toDo.map(el => {return {...el}})
+      const mass = this.toDo.map(el => {return {...el, parent: el}})
       this.toDoList = this.dayList.map((eList, inx)=>{ return (
           mass.filter((eDo)=>{
             //Исправляем, если вермя начала позже времяени окончания
@@ -154,7 +157,6 @@ export default {
             } 
         }))
       })
-      console.log(this.toDoList);
       //Модифицируем для отображения
       this.toDoList = this.toDoList.map((arr)=>{return (arr.map((el)=>{
         if(arr.length > 0){
