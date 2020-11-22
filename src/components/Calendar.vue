@@ -138,8 +138,9 @@ export default {
     },
     setToDoList(){
       //Распределяем "дела" по дням их выполнения
+      const mass = this.toDo.map(el => {return {...el}})
       this.toDoList = this.dayList.map((eList, inx)=>{ return (
-          this.toDo.filter((eDo)=>{
+          mass.filter((eDo)=>{
             //Исправляем, если вермя начала позже времяени окончания
             if(eDo.startDate > eDo.endDate){
               let val = eDo.startDate
@@ -147,12 +148,17 @@ export default {
               eDo.endDate = val
             }
             //Возвращаем "дела", время которых выпадает на нужный день
-            if(eDo.startDate >= eList.from && eDo.endDate <= eList.to) return eDo
+            
+            if(eDo.startDate >= eList.from && eDo.endDate <= eList.to){
+              return eDo
+            } 
         }))
       })
+      console.log(this.toDoList);
       //Модифицируем для отображения
       this.toDoList = this.toDoList.map((arr)=>{return (arr.map((el)=>{
         if(arr.length > 0){
+          
           //коэффициент сколько времени прошло от 00:00 до времени начала "дела"
           el.coefTop = ( (el.startDate - (this.UTC/1000) ) % (24*60*60))/(24*60*60)
           //коэффициент сколько времени длилось "дело"

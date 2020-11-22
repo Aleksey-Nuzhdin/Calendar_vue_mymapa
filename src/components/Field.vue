@@ -19,17 +19,18 @@
         <li class="day__item"
           ref="day__item"
           v-for="(day, index) of dayList" :key="index"
-          @drop.prevent="drop($event)"
           
-          @dragover.prevent='dragenter($event)'
+          @dragenter.self="dragenter($event)" 
+          @dragover.prevent=''
+          @drop.prevent.self="drop($event)"
         >
           <div class="toDo__item"
             v-for="(item, ind) in toDo[index]" :key="ind"
             :style="{top:(item.coefTop * dayItemHeight)+'px', height:(item.coefHeight * dayItemHeight)+'px' }"
             draggable="true"
-            @dragstart="dragstart($event)"
+            @dragstart.self="dragstart($event)"
             @dragend.prevent="dragend($event)"
-            @dragenter.prevent
+            
            
           >
           {{item.title}}
@@ -81,21 +82,26 @@ export default {
       }  
     },
     dragstart(e){
-      //console.log(e);
       this.dragged = e.target
-      //console.log(this.dragged, 11);
+
+      let shiftX = e.clientX - this.dragged.getBoundingClientRect().left;
+      let shiftY = e.clientY - this.dragged.getBoundingClientRect().top;
+
+      e.dataTransfer.setData('shiftX', shiftX)
+      e.dataTransfer.setData('shiftY', shiftY)
+      
+      
       e.target.style.opacity = 0.5;
-      //e.dataTransfer.setData('text/plain', 'dummy');
+      
     },
     drop(e){
-      //console.log(1);
-      console.log(e);
+      e.target.appendChild( this.dragged );
+      
+      this.dragged.style.top = e.layerY - parseInt(e.dataTransfer.getData('shiftY')) +'px'
+      this.dragged.style.left = e.layerX - parseInt(e.dataTransfer.getData('shiftX')) +'px'
+    
     },
     dragend(e){
-      //console.log(e.screenY);
-      //console.log(e.target.style.top);
-      //console.log(this.toDo[0][0]);
-      //this.toDo[0][0].coefTop+= 0.005
       e.target.style.opacity = ''; 
     },
     dragenter(e){
@@ -104,7 +110,6 @@ export default {
     }
   },
   created(){
-    //this.$parent.$on('setDate', this.setDate);
 
     for(let i = 1; i < 24; i++){
       if(i < 10) this.timeArr.push('0'+i)
@@ -186,5 +191,6 @@ export default {
   border: 2px solid white;
   border-radius: 8px;
   cursor: pointer;
+  user-select: none;
 }
 </style>
